@@ -163,7 +163,7 @@ cd backend
 
 ---
 
-If you want to proceed with authentication (JWT, roles), reply “next”.
+
 
 Example Request (using Postman)
 POST http://localhost:8080/auth/register
@@ -178,4 +178,3 @@ POST http://localhost:8080/auth/register
   "role": "ADMIN"
 }
 
-*For more details, see `requirements.md`.* 
