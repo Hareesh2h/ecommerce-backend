@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple E-commerce Frontend</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        input, button { margin: 0.2em; }
+        .section { border: 1px solid #ccc; padding: 1em; margin-bottom: 1em; border-radius: 8px; }
+        .token { word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>Simple E-commerce Frontend</h1>
+
+    <div class="section">
+        <h2>Register</h2>
+        <input id="reg-username" placeholder="Username">
+        <input id="reg-password" type="password" placeholder="Password">
+        <select id="reg-role">
+            <option value="CUSTOMER">Customer</option>
+            <option value="ADMIN">Admin</option>
+        </select>
+        <button onclick="register()">Register</button>
+        <div id="register-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Login</h2>
+        <input id="login-username" placeholder="Username">
+        <input id="login-password" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <div>JWT Token: <span class="token" id="jwt-token"></span></div>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Product List</h2>
+        <button onclick="getProducts()">Load Products</button>
+        <ul id="product-list"></ul>
+    </div>
+
+    <script>
+        let jwtToken = '';
+
+        function register() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+            fetch('http://localhost:8080/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, role })
+            })
+            .then(res => res.text())
+            .then(msg => document.getElementById('register-result').innerText = msg)
+            .catch(err => document.getElementById('register-result').innerText = err);
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            fetch('http://localhost:8080/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.text())
+            .then(token => {
+                jwtToken = token;
+                document.getElementById('jwt-token').innerText = token;
+                document.getElementById('login-result').innerText = 'Login successful!';
+            })
+            .catch(err => document.getElementById('login-result').innerText = err);
+        }
+
+        function getProducts() {
+            fetch('http://localhost:8080/products', {
+                headers: jwtToken ? { 'Authorization': 'Bearer ' + jwtToken } : {}
+            })
+            .then(res => res.json())
+            .then(products => {
+                const list = document.getElementById('product-list');
+                list.innerHTML = '';
+                products.forEach(p => {
+                    const li = document.createElement('li');
+                    li.innerText = `${p.name} (${p.category}) - $${p.price}`;
+                    list.appendChild(li);
+                });
+            })
+            .catch(err => {
+                document.getElementById('product-list').innerHTML = '<li>Error loading products</li>';
+            });
+        }
+    </script>
+</body>
+</html> 
